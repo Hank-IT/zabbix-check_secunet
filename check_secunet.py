@@ -75,8 +75,8 @@ def getStatus(url, token, verify):
 
         return {
             "vpnTiConnected": 1 if json['vpnTiConnected'] else 0,
-            "vpnTiConnectionStateDate": json['vpnTiConnectionStateDate'],
-            "connectorStarted": json['connectorStarted'],
+            "vpnTiConnectionStateDate": round(json['vpnTiConnectionStateDate'] / 1000),
+            "connectorStarted": round(json['connectorStarted'] / 1000),
             "restartRequired": 1 if json['restartRequired'] else 0,
         }
 
@@ -129,8 +129,8 @@ def getCards(url, token, verify):
             if card['type'] in eligibleCardTypes:
                 eligibleCards.append({
                     "cardhandle": card['cardhandle'],
-                    "insertTime": card['insertTime'],
-                    "expirationDate": card['expirationDate'],
+                    "insertTime": round(card['insertTime'] / 1000),
+                    "expirationDate": round(card['expirationDate'] / 1000),
                     "type": card['type'],
                     "commonName": card['commonName']
                 })
