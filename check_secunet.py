@@ -75,8 +75,8 @@ def getStatus(url, token, verify):
 
         return {
             "vpnTiConnected": 1 if json['vpnTiConnected'] else 0,
-            "vpnTiConnectionStateDate": datetime.datetime.fromtimestamp(json['vpnTiConnectionStateDate'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
-            "connectorStarted": datetime.datetime.fromtimestamp(json['connectorStarted'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
+            "vpnTiConnectionStateDate": datetime.datetime.fromtimestamp(json['vpnTiConnectionStateDate'] / 1000),
+            "connectorStarted": datetime.datetime.fromtimestamp(json['connectorStarted'] / 1000),
             "restartRequired": 1 if json['restartRequired'] else 0,
         }
 
@@ -91,7 +91,7 @@ def getUpdateStatus(url, token, verify):
         json = r.json()
 
         return {
-            "lastUpdateCheck": datetime.datetime.fromtimestamp(json['lastUpdate'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
+            "lastUpdateCheck": datetime.datetime.fromtimestamp(json['lastUpdate'] / 1000),
         }
 
     raise Exception('Unknown error')
@@ -129,8 +129,8 @@ def getCards(url, token, verify):
             if card['type'] in eligibleCardTypes:
                 eligibleCards.append({
                     "cardhandle": card['cardhandle'],
-                    "insertTime": datetime.datetime.fromtimestamp(card['insertTime'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
-                    "expirationDate": datetime.datetime.fromtimestamp(card['expirationDate'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
+                    "insertTime": datetime.datetime.fromtimestamp(card['insertTime'] / 1000),
+                    "expirationDate": datetime.datetime.fromtimestamp(card['expirationDate'] / 1000),
                     "type": card['type'],
                     "commonName": card['commonName']
                 })
