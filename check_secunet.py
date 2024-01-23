@@ -20,7 +20,7 @@ def main(argv):
             print('check.py --url=<url> --username=<username> --password=<password> -k <key>')
             sys.exit()
         elif opt in '-k':
-            eligibleKeys = ['status', 'cards', 'version', 'update-status']
+            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'cards-discovery']
 
             if arg not in eligibleKeys:
                 print("Unknown key: " + arg)
@@ -41,7 +41,7 @@ def main(argv):
     match key:
         case "status":
             print(json.dumps(getStatus(url, token, verify)))
-        case "cards":
+        case "cards" | "cards-discovery":
             print(json.dumps(getCards(url, token, verify)))
         case "version":
             print(json.dumps(getVersion(url, token, verify)))
