@@ -75,8 +75,8 @@ def getStatus(url, token, verify):
 
         return {
             "vpnTiConnected": 1 if json['vpnTiConnected'] else 0,
-            "vpnTiConnectionStateDate": json['vpnTiConnectionStateDate'] / 1000,
-            "connectorStarted": json['connectorStarted'] / 1000,
+            "vpnTiConnectionStateDate": json['vpnTiConnectionStateDate'],
+            "connectorStarted": json['connectorStarted'],
             "restartRequired": 1 if json['restartRequired'] else 0,
         }
 
@@ -91,7 +91,7 @@ def getUpdateStatus(url, token, verify):
         json = r.json()
 
         return {
-            "lastUpdateCheck": json['lastUpdate'] / 1000,
+            "lastUpdateCheck": json['lastUpdate'],
         }
 
     raise Exception('Unknown error')
@@ -129,8 +129,8 @@ def getCards(url, token, verify):
             if card['type'] in eligibleCardTypes:
                 eligibleCards.append({
                     "cardhandle": card['cardhandle'],
-                    "insertTime": card['insertTime'] / 1000,
-                    "expirationDate": card['expirationDate'] / 1000,
+                    "insertTime": card['insertTime'],
+                    "expirationDate": card['expirationDate'],
                     "type": card['type'],
                     "commonName": card['commonName']
                 })
