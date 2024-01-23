@@ -53,7 +53,7 @@ def main(argv):
 def login(url, username, password, verify):
     headers = {"Content-Type": "application/json"}
 
-    r = requests.post(url + '/rest/mgmt/ak/konten/login', json={'username': username, 'password': password}, verify=verify, headers=headers)
+    r = requests.post(url + '/rest/mgmt/ak/konten/login', json={'username': username, 'password': password}, verify=verify, headers=headers, timeout=10)
 
     if r.status_code == 204:
         return r.headers.get('Authorization')
@@ -63,12 +63,12 @@ def login(url, username, password, verify):
 def logout(url, token, verify):
     headers = {"Content-Type": "application/json", "Authorization": token}
 
-    requests.delete(url + '/rest/mgmt/ak/konten/profil/logout', verify=verify, headers=headers)
+    requests.delete(url + '/rest/mgmt/ak/konten/profil/logout', verify=verify, headers=headers, timeout=10)
 
 def getStatus(url, token, verify):
     headers = {'Authorization': token}
 
-    r = requests.get(url + '/rest/mgmt/ak/dienste/status', headers=headers, verify=verify)
+    r = requests.get(url + '/rest/mgmt/ak/dienste/status', headers=headers, verify=verify, timeout=10)
 
     if r.status_code == 200:
         json = r.json()
@@ -85,7 +85,7 @@ def getStatus(url, token, verify):
 def getUpdateStatus(url, token, verify):
     headers = {'Authorization': token}
 
-    r = requests.get(url + '/rest/mgmt/ak/dienste/ksr/informationen/updates-konnektor', headers=headers, verify=verify)
+    r = requests.get(url + '/rest/mgmt/ak/dienste/ksr/informationen/updates-konnektor', headers=headers, verify=verify, timeout=10)
 
     if r.status_code == 200:
         json = r.json()
@@ -99,7 +99,7 @@ def getUpdateStatus(url, token, verify):
 def getVersion(url, token, verify):
     headers = {'Authorization': token}
 
-    r = requests.get(url + '/rest/mgmt/ak/dienste/status/version', headers=headers, verify=verify)
+    r = requests.get(url + '/rest/mgmt/ak/dienste/status/version', headers=headers, verify=verify, timeout=10)
 
     if r.status_code == 200:
         json = r.json()
@@ -118,7 +118,7 @@ def getVersion(url, token, verify):
 def getCards(url, token, verify):
     headers = {'Authorization': token}
 
-    r = requests.get(url + '/rest/mgmt/ak/dienste/karten', headers=headers, verify=verify)
+    r = requests.get(url + '/rest/mgmt/ak/dienste/karten', headers=headers, verify=verify, timeout=10)
 
     if r.status_code == 200:
         cards = r.json()
