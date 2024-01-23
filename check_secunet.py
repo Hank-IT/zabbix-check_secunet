@@ -57,8 +57,8 @@ def login(url, username, password, verify):
 
     if r.status_code == 204:
         return r.headers.get('Authorization')
-    else:
-        raise Exception('Unknown error')
+
+    raise Exception('Unknown error')
 
 def logout(url, token, verify):
     headers = {"Content-Type": "application/json", "Authorization": token}
