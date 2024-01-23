@@ -74,10 +74,10 @@ def getStatus(url, token, verify):
         json = r.json()
 
         return {
-            "vpnTiConnected": json['vpnTiConnected'],
+            "vpnTiConnected": 1 if json['vpnTiConnected'] else 0,
             "vpnTiConnectionStateDate": datetime.datetime.fromtimestamp(json['vpnTiConnectionStateDate'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
             "connectorStarted": datetime.datetime.fromtimestamp(json['connectorStarted'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
-            "restartRequired": json['restartRequired'],
+            "restartRequired": 1 if json['restartRequired'] else 0,
         }
 
     raise Exception('Unknown error')
