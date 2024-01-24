@@ -96,7 +96,7 @@ def getUpdateStatus(url, token, verify):
         json = r.json()
 
         return {
-            "lastUpdateCheck": json['lastUpdate'],
+            "lastUpdateCheck": round(json['lastUpdate'] / 1000),
         }
 
     raise Exception('Error on getUpdateStatus')
