@@ -20,7 +20,7 @@ def main(argv):
             print('check.py --url=<url> --username=<username> --password=<password> -k <key>')
             sys.exit()
         elif opt in '-k':
-            eligibleKeys = ['status', 'cards', 'version', 'update-status']
+            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance']
 
             if arg not in eligibleKeys:
                 print("Unknown key: " + arg)
@@ -48,6 +48,8 @@ def main(argv):
                 print(json.dumps(getVersion(url, token, verify)))
             case "update-status":
                 print(json.dumps(getUpdateStatus(url, token, verify)))
+            case "performance":
+                 print(json.dumps(getPerformance(url, token, verify)))
 
         logout(url, token, verify)
 
@@ -119,6 +121,35 @@ def getVersion(url, token, verify):
         }
 
     raise Exception('Error on getVersion')
+
+def getPerformance(url, token, verify):
+    headers = {'Authorization': token}
+
+    r = requests.get(url + '/rest/mgmt/nk/status/basic', headers=headers, verify=verify, timeout=10)
+
+    if r.status_code == 200:
+        json = r.json()
+
+        return {
+            "cpuTemperature": json['cpuTemperature'],
+            "cpuTempStatus": json['cpuTempStatus'],
+            "memTotal": json['memTotal'],
+            "memFree": json['memFree'],
+            "memAvailable": json['memAvailable'],
+            "memBuffers": json['memBuffers'],
+            "memCached": json['memCached'],
+            "memMapped": json['memMapped'],
+            "memShmem": json['memShmem'],
+            "memSlab": json['memSlab'],
+            "memKernelStack": json['memKernelStack'],
+            "memPageTables": json['memPageTables'],
+            "uptime": json['uptime'],
+            "loadAvg1min": json['loadAvg1min'],
+            "loadAvg5min": json['loadAvg5min'],
+            "loadAvg15min": json['loadAvg15min'],
+        }
+
+    raise Exception('Error on getPerformance')
 
 def getCards(url, token, verify):
     headers = {'Authorization': token}
