@@ -132,7 +132,8 @@ def getCards(url, token, verify):
                     "insertTime": round(card['insertTime'] / 1000),
                     "expirationDate": round(card['expirationDate'] / 1000),
                     "type": card['type'],
-                    "commonName": card['commonName']
+                    "commonName": card['commonName'],
+                    "iccsn": card['iccsn']
                 })
 
         return eligibleCards
