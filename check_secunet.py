@@ -36,19 +36,24 @@ def main(argv):
         elif opt in ("--disable-cert-verify"):
             verify = False
 
-    token = login(url, username, password, verify)
+    try:
+        token = login(url, username, password, verify)
 
-    match key:
-        case "status":
-            print(json.dumps(getStatus(url, token, verify)))
-        case "cards":
-            print(json.dumps(getCards(url, token, verify)))
-        case "version":
-            print(json.dumps(getVersion(url, token, verify)))
-        case "update-status":
-            print(json.dumps(getUpdateStatus(url, token, verify)))
+        match key:
+            case "status":
+                print(json.dumps(getStatus(url, token, verify)))
+            case "cards":
+                print(json.dumps(getCards(url, token, verify)))
+            case "version":
+                print(json.dumps(getVersion(url, token, verify)))
+            case "update-status":
+                print(json.dumps(getUpdateStatus(url, token, verify)))
 
-    logout(url, token, verify)
+        logout(url, token, verify)
+
+    except Exception as e:
+        print("Error: " + str(e))
+        sys.exit()
 
 def login(url, username, password, verify):
     headers = {"Content-Type": "application/json"}
@@ -58,7 +63,7 @@ def login(url, username, password, verify):
     if r.status_code == 204:
         return r.headers.get('Authorization')
 
-    raise Exception('Unknown error')
+    raise Exception('Error on login')
 
 def logout(url, token, verify):
     headers = {"Content-Type": "application/json", "Authorization": token}
@@ -80,7 +85,7 @@ def getStatus(url, token, verify):
             "restartRequired": 1 if json['restartRequired'] else 0,
         }
 
-    raise Exception('Unknown error')
+    raise Exception('Error on getStatus')
 
 def getUpdateStatus(url, token, verify):
     headers = {'Authorization': token}
@@ -94,7 +99,7 @@ def getUpdateStatus(url, token, verify):
             "lastUpdateCheck": json['lastUpdate'],
         }
 
-    raise Exception('Unknown error')
+    raise Exception('Error on getUpdateStatus')
 
 def getVersion(url, token, verify):
     headers = {'Authorization': token}
@@ -113,7 +118,7 @@ def getVersion(url, token, verify):
             "buildTime": json['buildTime'],
         }
 
-    raise Exception('Unknown error')
+    raise Exception('Error on getVersion')
 
 def getCards(url, token, verify):
     headers = {'Authorization': token}
@@ -138,7 +143,7 @@ def getCards(url, token, verify):
 
         return eligibleCards
 
-    raise Exception('Unknown error')
+    raise Exception('Error on getCards')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
