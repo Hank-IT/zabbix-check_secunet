@@ -6,21 +6,24 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 eligibleCardTypes = ['HBA', 'SMC_KT', 'SMC_B', 'SMC_K']
 
+
 def main(argv):
     verify = True
     url = ""
     key = ""
     username = ""
     password = ""
+    iccsnSmcb = ""
+    tenant = ""
 
-    opts, args = getopt.getopt(argv, "hk:", ["url=", "username=", "password=", "disable-cert-verify"])
+    opts, args = getopt.getopt(argv, "hk:", ["url=", "username=", "password=", "tenant=", "iccsn-smcb=", "disable-cert-verify"])
 
     for opt, arg in opts:
         if opt == '-h':
-            print('check.py --url=<url> --username=<username> --password=<password> -k <key>')
+            print('check.py --url=<url> --username=<username> --password=<password> --tenant=<tenant> --iccsn-smcb=<iccsn-smcb> -k <key>')
             sys.exit()
         elif opt in '-k':
-            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance']
+            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status']
 
             if arg not in eligibleKeys:
                 print("Unknown key: " + arg)
@@ -35,6 +38,10 @@ def main(argv):
             password = arg
         elif opt in ("--disable-cert-verify"):
             verify = False
+        elif opt in ("--iccsn-smcb"):
+            iccsnSmcb = arg
+        elif opt in ("--tenant"):
+            tenant = arg
 
     try:
         token = login(url, username, password, verify)
@@ -49,7 +56,9 @@ def main(argv):
             case "update-status":
                 print(json.dumps(getUpdateStatus(url, token, verify)))
             case "performance":
-                 print(json.dumps(getPerformance(url, token, verify)))
+                print(json.dumps(getPerformance(url, token, verify)))
+            case "smcb-status":
+                 print(json.dumps(getSmcBStatus(url, token, verify, iccsnSmcb, tenant)))
 
         logout(url, token, verify)
 
@@ -57,20 +66,53 @@ def main(argv):
         print("Error: " + str(e))
         sys.exit()
 
+
 def login(url, username, password, verify):
     headers = {"Content-Type": "application/json"}
 
-    r = requests.post(url + '/rest/mgmt/ak/konten/login', json={'username': username, 'password': password}, verify=verify, headers=headers, timeout=10)
+    r = requests.post(url + '/rest/mgmt/ak/konten/login', json={'username': username, 'password': password},
+                      verify=verify, headers=headers, timeout=10)
 
     if r.status_code == 204:
         return r.headers.get('Authorization')
 
     raise Exception('Error on login')
 
+
 def logout(url, token, verify):
     headers = {"Content-Type": "application/json", "Authorization": token}
 
     requests.delete(url + '/rest/mgmt/ak/konten/profil/logout', verify=verify, headers=headers, timeout=10)
+
+def getSmcBStatus(url, token, verify, iccsn_smcb, tenant):
+    headers = {'Authorization': token}
+
+    r = requests.get(url + '/rest/mgmt/ak/dienste/karten', headers=headers, verify=verify, timeout=10)
+
+    if r.status_code == 200:
+        card_json = r.json()
+
+        matched_card = {}
+
+        for card in card_json:
+            if card['iccsn'] == iccsn_smcb:
+                matched_card = card
+
+        if not matched_card:
+            return {
+                "status": 'unknown'
+            }
+
+        r = requests.get(url + '/rest/mgmt/ak/dienste/karten/smb/' + matched_card['cardhandle'] + '/' + tenant +  '/pin', headers=headers, verify=verify, timeout=10)
+
+        if r.status_code == 200:
+            pin_json = r.json()
+
+            return {
+                "status": pin_json['status'].lower()
+            }
+
+    raise Exception('Error on getSmcBStatus')
 
 def getStatus(url, token, verify):
     headers = {'Authorization': token}
@@ -89,10 +131,12 @@ def getStatus(url, token, verify):
 
     raise Exception('Error on getStatus')
 
+
 def getUpdateStatus(url, token, verify):
     headers = {'Authorization': token}
 
-    r = requests.get(url + '/rest/mgmt/ak/dienste/ksr/informationen/updates-konnektor', headers=headers, verify=verify, timeout=10)
+    r = requests.get(url + '/rest/mgmt/ak/dienste/ksr/informationen/updates-konnektor', headers=headers, verify=verify,
+                     timeout=10)
 
     if r.status_code == 200:
         json = r.json()
@@ -102,6 +146,7 @@ def getUpdateStatus(url, token, verify):
         }
 
     raise Exception('Error on getUpdateStatus')
+
 
 def getVersion(url, token, verify):
     headers = {'Authorization': token}
@@ -121,6 +166,7 @@ def getVersion(url, token, verify):
         }
 
     raise Exception('Error on getVersion')
+
 
 def getPerformance(url, token, verify):
     headers = {'Authorization': token}
@@ -151,6 +197,7 @@ def getPerformance(url, token, verify):
 
     raise Exception('Error on getPerformance')
 
+
 def getCards(url, token, verify):
     headers = {'Authorization': token}
 
@@ -175,6 +222,7 @@ def getCards(url, token, verify):
         return eligibleCards
 
     raise Exception('Error on getCards')
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
