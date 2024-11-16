@@ -23,7 +23,7 @@ def main(argv):
             print('check.py --url=<url> --username=<username> --password=<password> --tenant=<tenant> --iccsn-smcb=<iccsn-smcb> -k <key>')
             sys.exit()
         elif opt in '-k':
-            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status']
+            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status', 'card-terminals']
 
             if arg not in eligibleKeys:
                 print("Unknown key: " + arg)
@@ -59,6 +59,8 @@ def main(argv):
                 print(json.dumps(getPerformance(url, token, verify)))
             case "smcb-status":
                  print(json.dumps(getSmcBStatus(url, token, verify, iccsnSmcb, tenant)))
+            case "card-terminals":
+                 print(json.dumps(getCardTerminals(url, token, verify)))
 
         logout(url, token, verify)
 
@@ -131,6 +133,33 @@ def getStatus(url, token, verify):
 
     raise Exception('Error on getStatus')
 
+def getCardTerminals(url, token, verify):
+    headers = {'Authorization': token}
+
+    r = requests.get(url + '/rest/mgmt/ak/dienste/kartenterminals', headers=headers, verify=verify, timeout=10)
+
+    if r.status_code == 200:
+        cardTerminals = r.json()
+
+        payload = []
+
+        for cardTerminal in cardTerminals:
+            payload.append({
+                "id": cardTerminal['cardTerminalId'],
+                "label": cardTerminal['label'],
+                "ipAddress": cardTerminal['ipAddress'],
+                "port": cardTerminal['port'],
+                "hostname": cardTerminal['hostname'],
+                "macAddress": cardTerminal['macAddress'],
+                "slotCount": cardTerminal['slotCount'],
+                "correlation": cardTerminal['correlation'],
+                "autoUpdate": 1 if cardTerminal['autoUpdate'] else 0,
+                "connected": 1 if cardTerminal['connected'] else 0,
+            })
+
+        return payload
+
+    raise Exception('Error on getCardTerminals')
 
 def getUpdateStatus(url, token, verify):
     headers = {'Authorization': token}
