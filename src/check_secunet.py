@@ -23,7 +23,7 @@ def main(argv):
             print('check.py --url=<url> --username=<username> --password=<password> --tenant=<tenant> --iccsn-smcb=<iccsn-smcb> -k <key>')
             sys.exit()
         elif opt in '-k':
-            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status', 'card-terminals']
+            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status', 'card-terminals', 'client-system-credentials']
 
             if arg not in eligibleKeys:
                 print("Unknown key: " + arg)
@@ -61,6 +61,8 @@ def main(argv):
                  print(json.dumps(getSmcBStatus(url, token, verify, iccsnSmcb, tenant)))
             case "card-terminals":
                  print(json.dumps(getCardTerminals(url, token, verify)))
+            case "client-system-credentials":
+                print(json.dumps(getClientSystemCredentials(url, token, verify)))
 
         logout(url, token, verify)
 
@@ -160,6 +162,30 @@ def getCardTerminals(url, token, verify):
         return payload
 
     raise Exception('Error on getCardTerminals')
+
+def getClientSystemCredentials(url, token, verify):
+    headers = {'Authorization': token}
+
+    r = requests.get(url + '/rest/mgmt/ak/info/clientsysteme', headers=headers, verify=verify, timeout=10)
+
+    if r.status_code == 200:
+        clientSystems = r.json()
+
+        payload = []
+
+        for clientSystem in clientSystems:
+            for certificate in clientSystem['certificates']:
+                payload.append({
+                    "id": clientSystem['internalId'],
+                    "client_system_id": clientSystem['clientSystemId'],
+                    "valid_from": round(certificate['validity']['notBefore'] / 1000),
+                    "valid_until": round(certificate['validity']['notAfter'] / 1000),
+                    "filename": certificate['filename'],
+                })
+
+        return payload
+
+    raise Exception('Error on getClientSystemCredentials')
 
 def getUpdateStatus(url, token, verify):
     headers = {'Authorization': token}
