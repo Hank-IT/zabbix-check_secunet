@@ -23,7 +23,7 @@ def main(argv):
             print('check.py --url=<url> --username=<username> --password=<password> --tenant=<tenant> --iccsn-smcb=<iccsn-smcb> -k <key>')
             sys.exit()
         elif opt in '-k':
-            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status', 'card-terminals', 'client-system-credentials']
+            eligibleKeys = ['status', 'cards', 'version', 'update-status', 'performance', 'smcb-status', 'card-terminals', 'client-system-credentials', 'time']
 
             if arg not in eligibleKeys:
                 print("Unknown key: " + arg)
@@ -63,6 +63,8 @@ def main(argv):
                  print(json.dumps(getCardTerminals(url, token, verify)))
             case "client-system-credentials":
                 print(json.dumps(getClientSystemCredentials(url, token, verify)))
+            case "time":
+                print(json.dumps(getTime(url, token, verify)))
 
         logout(url, token, verify)
 
@@ -251,6 +253,21 @@ def getPerformance(url, token, verify):
         }
 
     raise Exception('Error on getPerformance')
+
+def getTime(url, token, verify):
+    headers = {'Authorization': token}
+
+    r = requests.get(url + '/rest/mgmt/nk/ntp/zeit', headers=headers, verify=verify, timeout=10)
+
+    if r.status_code == 200:
+        json = r.json()
+
+        return {
+            "timestamp": round(json['time'] / 1000),
+            "timezone": json['timeZone']
+        }
+
+    raise Exception('Error on getTime')
 
 
 def getCards(url, token, verify):
